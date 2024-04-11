@@ -22,11 +22,11 @@ I need to explore hyperparameter tuning further to optimize the model's performa
 My work heavily relied on the Hugging Face documentation and a hands-on experimentation approach.[^5]
 
 
-[!NOTE]
-For help with my writing, I asked Grammarly to respond to these AI prompts:
-
-Prompts created by Grammarly
-- "Improve it"
+> [!NOTE]
+> For help with my writing, I asked Grammarly to respond to these AI prompts:
+>
+> Prompts created by Grammarly
+> - "Improve it"
 
 References:
 [^1]: distilbert/distilbert-base-uncased · Hugging Face. https://huggingface.co/distilbert/distilbert-base-uncased
