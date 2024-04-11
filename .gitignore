@@ -3,4 +3,4 @@ nohup.out
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 data/
-lightweight-fine-tuning/distilbert-base-uncased-ft-lora/
+
