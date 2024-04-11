@@ -21,6 +21,13 @@ I need to explore hyperparameter tuning further to optimize the model's performa
 
 My work heavily relied on the Hugging Face documentation and a hands-on experimentation approach.[^6]
 
+## Feedback & Suggestions
+- Use Markdown in Jupyter Notebooks to document the code and include references
+- Add a [Table of Contents](https://medium.com/@sambozek/ipython-er-jupyter-table-of-contents-69bb72cf39d3) for large notebooks
+- Accuracy is not a good metric for imbalanced datasets, review the [accuracy paradox](https://en.wikipedia.org/wiki/Accuracy_paradox) article and [Tour of Evaluation Metrics for Imbalanced Datasets](https://machinelearningmastery.com/tour-of-evaluation-metrics-for-imbalanced-classification/)
+- Suggested reading:
+    - https://www.leewayhertz.com/parameter-efficient-fine-tuning/
+    - https://arxiv.org/pdf/2312.12148.pdf
 ---
 
 > [!NOTE]
