@@ -36,6 +36,7 @@ My work heavily relied on the Hugging Face documentation and a hands-on experime
 [^4]: amazon_polarity · Datasets at Hugging Face. https://huggingface.co/datasets/amazon_polarity
 [^5]: Methods and tools for efficient training on a single GPU. https://huggingface.co/docs/transformers/v4.39.3/en/perf_train_gpu_one#using--peft
 [^6]: Fine-tune a pretrained model. Hugging Face Documentation. https://huggingface.co/docs/transformers/training
-  Load adapters with PEFT. Hugging Face Documentation. https://huggingface.co/docs/transformers/peft
+
+      Load adapters with PEFT. Hugging Face Documentation. https://huggingface.co/docs/transformers/peft
 
 
