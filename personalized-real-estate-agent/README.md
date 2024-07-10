@@ -1,5 +1,5 @@
 
-## Overview
+# Overview
 HomeMatch is a smart real estate agent application that uses AI to generate and recommend real estate listings based on user preferences. It utilizes several AI models and technologies, including OpenAI's GPT for text generation, DALL-E for image generation, and CLIP for embedding generation and similarity search.
 ## Key Components
 ### Dependencies
