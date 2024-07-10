@@ -112,6 +112,8 @@ The output displays the recommended property image and its enhanced description.
 To run the application, ensure all dependencies are installed and environment variables are set (particularly OpenAI API key). Then, simply run:
 
 ```bash
+export OPENAI_API_KEY="Your OPENAI API Key"
+pip install -r requirements.txt
 python HomeMatch.py
 ```
 
