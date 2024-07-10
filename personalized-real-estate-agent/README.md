@@ -113,3 +113,39 @@ python HomeMatch.py
 ``` 
 The Gradio interface will launch, allowing users to interact with the HomeMatch system.
 
+Here's the evaluation in markdown format using tables:
+
+# HomeMatch Project Evaluation
+
+## Synthetic Data Generation
+
+| Criteria | Requirement | Met? | Implementation |
+|----------|-------------|------|----------------|
+| Generating Real Estate Listings with an LLM | Generate at least 10 diverse and realistic listings containing facts about the real estate | ✅ | The `generate_listings()` function uses GPT-3.5-turbo to create 15 detailed listings including title, location, price, property details, and descriptions. |
+
+## Semantic Search
+
+| Criteria | Requirement | Met? | Implementation |
+|----------|-------------|------|----------------|
+| Creating a Vector Database and Storing Listings | Create a vector database and store real estate listing embeddings | ✅ | LanceDB is used to create a vector database. The `generate_embeddings()` function creates embeddings using CLIP and stores them in LanceDB along with listing details. |
+| Semantic Search of Listings Based on Buyer Preferences | Implement functionality to semantically search listings based on buyer preferences | ✅ | The `find_listing()` function encodes buyer preferences with CLIP and searches the LanceDB table for similar listings. |
+
+## Augmented Response Generation
+
+| Criteria | Requirement | Met? | Implementation |
+|----------|-------------|------|----------------|
+| Logic for Searching and Augmenting Listing Descriptions | Implement logic to search and augment listing descriptions based on buyer preferences | 🟨 | Searching is implemented in `find_listing()`, but augmentation is a TODO in `enhance_listing_description()`. |
+| Use of LLM for Generating Personalized Descriptions | Use an LLM to generate personalized descriptions based on buyer preferences | 🟨 | Initial listings are generated with GPT-3.5-turbo, but personalization based on preferences is not yet implemented. |
+
+## Legend
+- ✅ Fully Met
+- 🟨 Partially Met
+
+## Summary
+
+The HomeMatch project meets most of the core requirements of the rubric. It successfully implements synthetic data generation and semantic search functionalities. However, to fully satisfy all criteria, the project needs to complete the implementation of augmented response generation:
+
+1. Implement the `enhance_listing_description()` function to use an LLM for generating personalized descriptions based on buyer preferences.
+2. Ensure that the augmented descriptions personalize the listing without altering factual information.
+
+Once these additions are made, the project will fully meet all the rubric requirements for a Personalized Real Estate Agent.
