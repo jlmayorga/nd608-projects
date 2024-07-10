@@ -93,6 +93,20 @@ class RealEstateListingLanceDB(LanceModel):
     def image_as_pil(self):
         return Image.open(BytesIO(self.image_bytes))
 
+    def __str__(self) -> str:
+        return (
+            f"Title: {self.title}\n"
+            f"Location: {self.neighborhood}, {self.city}, {self.state}\n"
+            f"Price: ${self.price:,}\n"
+            f"Property Type: {self.property_type}\n"
+            f"Size: {self.size:,} sqft\n"
+            f"Bedrooms: {self.bedrooms}\n"
+            f"Bathrooms: {self.bathrooms}\n"
+            f"Amenities: {', '.join(self.amenities)}\n"
+            f"Description: {self.description}\n"
+            f"Neighborhood: {self.neighborhood_description}"
+        )
+
 
 def generate_listings() -> RealEstateListings:
     prompt = ChatPromptTemplate.from_messages([
@@ -176,44 +190,45 @@ def find_listing(
         model: CLIPModel,
         tokenizer: PreTrainedTokenizerBase,
         description: str,
-        state: str,
-        city: str,
-        property_type: str,
         bedrooms: int,
         bathrooms: float,
         budget: float,
         amenities: List[str]
 ) -> RealEstateListingLanceDB:
-    client_preferences = (f"{property_type} with {bedrooms} bedrooms and {bathrooms} bathrooms in {city}, {state}. "
+    client_preferences = (f"Property with {bedrooms} bedrooms and {bathrooms} bathrooms. "
                           f" With amenities: {",".join(amenities)}")
-    # TODO: Replace hardcoded text with description from UI
+
     inputs = tokenizer(client_preferences, padding=True, truncation=True, return_tensors="pt")
     text_features = model.get_text_features(**inputs)[0].cpu().detach().numpy()
 
     query = table.search(text_features)
-
-    if False:
-        # Use Filtering https://lancedb.github.io/lancedb/sql/
-        if state is not None:
-            query.where(f"state = '{state}'")
-        if city is not None:
-            query.where(f"city = '{city}'")
-        if property_type is not None:
-            query.where(f"property_type = '{property_type}'")
-        if bedrooms > 0:
-            query.where(f"bedrooms >= {bedrooms}")
-        if bathrooms > 0:
-            query.where(f"bathrooms >= {bathrooms}")
-        if budget > 0:
-            query.where(f"price <= {budget}")
 
     listings = query.to_pydantic(RealEstateListingLanceDB)
 
     return random.choice(listings) if listings else None
 
 
-def enhance_listing_description(listing: RealEstateListingLanceDB) -> str:
-    pass
+def enhance_listing_description(listing: RealEstateListingLanceDB, user_preferences: str) -> str:
+    llm = ChatOpenAI(model="gpt-3.5-turbo")
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system",
+         "You are a helpful real estate agent. Your task is to enhance the description of a property based on the user's preferences without changing any factual information about the property."),
+        ("user", dedent(f'''
+        Property details:
+        {str(listing)}
+
+        User preferences:
+        {user_preferences}
+
+        Enhance the property description to appeal to the user's preferences without changing any factual information about the property. Keep the enhanced description concise, focusing on how the property meets the user's needs.
+        '''))
+    ])
+
+    chain = prompt | llm
+    response = chain.invoke({})
+
+    return response.content
 
 
 def get_recommendation(
@@ -221,23 +236,22 @@ def get_recommendation(
         model: CLIPModel,
         tokenizer: PreTrainedTokenizer,
         description: str,
-        state: str,
-        city: str,
-        property_type: str,
         bedrooms: int,
         bathrooms: float,
         budget: float,
         amenities: List[str]
 ) -> Tuple[Optional[Image.Image], str]:
-    listing = find_listing(table, model, tokenizer, description, state, city, property_type, bedrooms, bathrooms,
+    listing = find_listing(table, model, tokenizer, description, bedrooms, bathrooms,
                            budget, amenities)
     if listing is None:
         return None, "We couldn't find any property matching the criteria, please try again"
 
+    user_preferences = (f"Looking for a property with {bedrooms} bedrooms, "
+                        f"{bathrooms} bathrooms, and a budget of ${budget}. "
+                        f"Desired amenities: {', '.join(amenities)}. Additional preferences: {description}")
 
-    # TODO: Call LLM for generated text
-    augmented_description = enhance_listing_description(listing)
-    return listing.image_as_pil, listing.description
+    enhanced_description = enhance_listing_description(listing, user_preferences)
+    return listing.image_as_pil, enhanced_description
 
 
 def get_listing_embeddings(listing: RealEstateListing) -> torch.Tensor:
@@ -245,9 +259,16 @@ def get_listing_embeddings(listing: RealEstateListing) -> torch.Tensor:
     model = CLIPModel.from_pretrained(CLIP_MODEL).to(device)
     processor = CLIPProcessor.from_pretrained(CLIP_MODEL)
 
+    # Enhance with other listing properties
+    text_description = (
+        f"{listing.title}. {listing.property_type} in {listing.neighborhood}, {listing.city}, {listing.state}. "
+        f"{listing.bedrooms} bedrooms, {listing.bathrooms} bathrooms, {listing.size} sqft. "
+        f"Price: ${listing.price}. Amenities: {', '.join(listing.amenities)}. "
+        f"{listing.description} {listing.neighborhood_description}")
+
     processor_output = processor(
-        # TODO: Enhance with other listing properties
-        text=[listing.description + listing.neighborhood_description],
+
+        text=[text_description],
         images=listing.image_as_pil,
         return_tensors="pt",
         padding=True,
@@ -305,9 +326,6 @@ def main():
         fn=partial(get_recommendation, table, model, tokenizer),
         inputs=[
             gr.Text(label="Description", placeholder="Description"),
-            gr.Dropdown(label="State", choices=states),
-            gr.Dropdown(label="City", choices=cities),
-            gr.Dropdown(label="Property Type", choices=property_types),
             gr.Slider(label="Bedrooms", minimum=min_bedrooms, maximum=max_bedrooms, value=min_bedrooms, step=1),
             gr.Slider(label="Bathrooms", minimum=min_bathrooms, maximum=max_bathrooms, value=min_bathrooms, step=0.5),
             gr.Slider(label="Budget", maximum=max_price, minimum=min_price, value=min_price),
